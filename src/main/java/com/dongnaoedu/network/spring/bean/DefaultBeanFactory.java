@@ -6,6 +6,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -30,6 +31,9 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
     public Object getBean(String beanName) throws Exception{
         BeanDefinition bd = map.get(beanName);
         Object bean = doGetBean(beanName);
+
+        //完成属性注入
+        setPropertyDIValues(bd,bean);
 
         //开始bean的生命周期
         if (StringUtils.isNotBlank(bd.getInitMethod())){
@@ -70,6 +74,9 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
             //成员工厂构建对象 (不是工厂类  应该是工厂bean名FactoryBean + 工厂方法名)
             bean = createBeanByFactoryBean(beanDefinition);
         }
+        // 实例创建完成后进行删除
+        ingBeans.remove(beanName);
+        // 对单例bean的处理
         if (beanDefinition.isSingleton()){
             beanMap.put(beanName,bean);
         }
@@ -234,7 +241,37 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
         }
         return values;
     }
-
+    private void setPropertyDIValues(BeanDefinition bd, Object instance) throws Exception {
+        if (CollectionUtils.isEmpty(bd.getPropertyValues())) {
+            return;
+        }
+        for (PropertyValue pv : bd.getPropertyValues()) {
+            if (StringUtils.isBlank(pv.getName())) {
+                continue;
+            }
+            Class<?> clazz = instance.getClass();
+            Field p = clazz.getDeclaredField(pv.getName());
+            p.setAccessible(true);
+            Object rv = pv.getValue();
+            Object v = null;
+            if (rv == null) {
+                v = null;
+            } else if (rv instanceof BeanReference) {
+                v = this.doGetBean(((BeanReference) rv).getBeanName());
+            } else if (rv instanceof Object[]) {
+                // TODO 处理集合中的bean引用
+            } else if (rv instanceof Collection) {
+                // TODO 处理集合中的bean引用
+            } else if (rv instanceof Properties) {
+                // TODO 处理properties中的bean引用
+            } else if (rv instanceof Map) {
+                // TODO 处理Map中的bean引用
+            } else {
+                v = rv;
+            }
+            p.set(instance, v);
+        }
+    }
 
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {

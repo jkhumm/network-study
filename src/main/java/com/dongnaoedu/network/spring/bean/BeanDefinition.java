@@ -75,4 +75,7 @@ public interface BeanDefinition {
     Method getFactoryMethod();
     void setFactoryMethod(Method factoryMethod);
 
+    //属性依赖用到
+    List<PropertyValue> getPropertyValues();
+    void setPropertyValues(List<PropertyValue> propertyValues);
 }

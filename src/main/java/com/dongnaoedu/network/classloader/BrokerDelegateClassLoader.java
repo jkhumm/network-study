@@ -1,12 +1,44 @@
 package com.dongnaoedu.network.classloader;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * @author heian
  * @date 2021/2/28 8:31 下午
  * @description
  */
 public class BrokerDelegateClassLoader extends ClassLoader{
+    public static final String file_path = "/Users/apple/Desktop/HelloWorld.class";
+    public static final String classPath = "com.dongnaoedu.network.classloader.HelloWorld";
 
+    //将class文件读入内存
+    private static byte[] getClassBytes(String filePath) throws ClassNotFoundException{
+        String name = file_path;
+        System.out.println("文件地址：" + name);
+        Path path = Paths.get(name);
+        if (!path.toFile().exists()){
+            throw new ClassNotFoundException ("该路径下" + filePath + "无class文件");
+        }
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream ()){
+            Files.copy(path,out);
+            return out.toByteArray();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    protected Class<?> findClass(String path) throws ClassNotFoundException {
+        byte[] bytes = getClassBytes(path);
+        if(bytes.length == 0){
+            throw new ClassNotFoundException ("找不到该文件");
+        }
+        return this.defineClass (classPath,bytes,0,bytes.length);//第一个参数为类名
+    }
     /**
      * 复写此方法，破坏双亲委派模型
      * @param className 类的全路径名
@@ -55,14 +87,9 @@ public class BrokerDelegateClassLoader extends ClassLoader{
     }
 
     public static void main(String[] args) throws Exception {
-        ClassLoader classLoader = BrokerDelegateClassLoader.class.getClassLoader();//系统类加载器
-        System.out.println(classLoader.toString());
-        Class<?> aClass = classLoader.loadClass("com.dongnaoedu.network.classloader.HelloWorld");
-        System.out.println(aClass.getClassLoader() + "hashcode" + aClass.hashCode());
-
-        MyClassLoader myClassLoader = new MyClassLoader();
-        Class<?> aClass1 = myClassLoader.loadClass("com.dongnaoedu.network.classloader.HelloWorld");
-        System.out.println(aClass1.getClassLoader() + "hashcode" + aClass1.hashCode());
+        BrokerDelegateClassLoader classLoader = new BrokerDelegateClassLoader();
+        Class<?> aClass = classLoader.loadClass(file_path);
+        System.out.println(aClass.getClassLoader());
 
     }
 

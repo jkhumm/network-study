@@ -17,9 +17,8 @@ public class ReferenceDemo {
         oldEntity.setSeqence(321);
         reference.set(oldEntity);
         long seqence = reference.get().getSeqence();
-        long time = reference.get().getTime();
         seqence++;
-        time = System.currentTimeMillis();
+        long time = System.currentTimeMillis();
         MyEntity newEntity = new MyEntity();
         newEntity.setSeqence(seqence);
         newEntity.setTime(time);

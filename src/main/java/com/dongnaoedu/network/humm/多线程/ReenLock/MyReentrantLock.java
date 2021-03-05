@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.IntStream;
 
 /**
  * @author heian
@@ -47,11 +46,7 @@ public class MyReentrantLock {
                 }
             }
 
-            //非公平的实现
-        /*    if (count.compareAndSet(count.get(),count.get()+1)){
-                reference.set(Thread.currentThread());
-                return true;
-            }*/
+
         }
         return false;
     }
@@ -66,9 +61,10 @@ public class MyReentrantLock {
             queue.offer(Thread.currentThread());
             //lock 是不死不休所以得用for循环，既然CAS拿不到则由轻量级锁转为重量级锁（挂起阻塞）再一次去拿锁
             for (;;){
-                Thread hreadThread = queue.peek();
-                //队列可能一个线程，所以offer进来的或者说唤醒进来的，都会去判断是不是头部，是头部则再一次去抢锁
-                if (hreadThread == Thread.currentThread()){
+                Thread headThread = queue.peek();
+                //进入这段代码表明你可能是刚进来的也可能是被唤醒的
+                if (headThread == Thread.currentThread()){
+                   //都会去判断是不是头部，是头部则表示自己是被唤醒的或者刚进来的，被唤醒的需要再一次抢锁，不是则乖乖阻塞着
                     if (tryLock()){
                         queue.poll();
                         break;

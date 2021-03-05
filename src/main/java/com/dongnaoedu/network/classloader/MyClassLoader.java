@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class MyClassLoader extends ClassLoader {
 
-   public static final String file_path = "/Users/apple/Desktop/HelloWorld.class";
+    public static final String file_path = "/Users/apple/Desktop/HelloWorld.class";
     public static final String classPath = "com.dongnaoedu.network.classloader.HelloWorld";
 
     //将class文件读入内存
@@ -38,7 +38,6 @@ public class MyClassLoader extends ClassLoader {
         if(bytes.length == 0){
             throw new ClassNotFoundException ("找不到该文件");
         }
-
         return this.defineClass (classPath,bytes,0,bytes.length);//第一个参数为类名
     }
     //返回大写setName方法名

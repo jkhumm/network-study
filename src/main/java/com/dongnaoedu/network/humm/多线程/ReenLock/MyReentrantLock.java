@@ -64,7 +64,8 @@ public class MyReentrantLock {
                 Thread headThread = queue.peek();
                 //进入这段代码表明你可能是刚进来的也可能是被唤醒的
                 if (headThread == Thread.currentThread()){
-                   //都会去判断是不是头部，是头部则表示自己是被唤醒的或者刚进来的，被唤醒的需要再一次抢锁，不是则乖乖阻塞着
+                    //都会去判断是不是头部，是头部则表示自己是被唤醒的或者刚进来的
+                    //被唤醒的需要再一次抢锁（即使是被唤醒的此时也有可能被外来线程抢锁），不是则乖乖阻塞着
                     if (tryLock()){
                         queue.poll();
                         break;

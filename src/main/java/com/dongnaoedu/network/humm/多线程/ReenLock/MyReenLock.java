@@ -9,7 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @author heian
  * @create 2020-02-24-8:54 上午
- * @description
+ * @description 非公平锁
  */
 public class MyReenLock {
     //想获取锁的线程

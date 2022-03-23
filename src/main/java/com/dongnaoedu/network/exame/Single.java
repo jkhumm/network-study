@@ -17,13 +17,13 @@ public final class Single {
     }
 
     public static void main(String[] args) {
+        // 如何实现 将ab的值互相调换，但是不能通过中间变量
         int a = 1;
         int b = 10;
-
         b = a + b;//1 + 10
-        a = b - a ;//1 + 10 - 1;
+        a = b - a ;//1 + 10 - 1 a+b-a ==> a=b
 
-        b =  b - a;
+        b =  b - a;  // a+b-b ==> b-a
 
         System.out.println(a);
         System.out.println(b);

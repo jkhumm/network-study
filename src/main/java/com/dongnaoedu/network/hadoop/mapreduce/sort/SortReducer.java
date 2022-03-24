@@ -6,6 +6,10 @@ import org.apache.hadoop.mapreduce.Reducer;
 
 import java.io.IOException;
 
+
+/**
+ * 排序
+ */
 public class SortReducer extends Reducer<PairWritable, Text,PairWritable, NullWritable> {
 
 

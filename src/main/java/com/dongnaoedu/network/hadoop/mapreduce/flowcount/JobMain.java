@@ -1,9 +1,8 @@
-package com.dongnaoedu.network.hadoop.mapreduce;
+package com.dongnaoedu.network.hadoop.mapreduce.flowcount;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -16,32 +15,32 @@ public class JobMain extends Configured implements Tool{
 
     @Override
     public int run(String[] strings) throws Exception{
-        Job job = Job.getInstance(super.getConf(), "mapReduce_wordCount");
+        Job job = Job.getInstance(super.getConf(), "mapReduce_flowCount");
         
         //打包放在集群下运行，需要做一个配置
         job.setJarByClass(JobMain.class);
         
         // 第一步：设置读取文件的类：k1 v1
         job.setInputFormatClass(TextInputFormat.class);
-        TextInputFormat.addInputPath(job, new Path("hdfs://node01:8082/wordcount"));
+        TextInputFormat.addInputPath(job, new Path("hdfs://node01:8082/input/flowcount"));
         
         // 第二步：设置mapper类
-        job.setMapperClass(WordCountMapper.class);
+        job.setMapperClass(FlowCountMapper.class);
         // 设置map阶段输出类型
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(LongWritable.class);
+        job.setMapOutputValueClass(FlowBean.class);
         
         // 第三 四 五 六步采用默认方式（分区 排序 规约 分组）
         
         // 第七步:设置Reduce类
-        job.setReducerClass(WordCountReduce.class);
+        job.setReducerClass(FlowCountReduce.class);
         job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(LongWritable.class);
+        job.setOutputValueClass(FlowBean.class);
         
         // 第八步：设置输出类
         job.setOutputFormatClass(TextOutputFormat.class);
-        // 设置输出路径，会自动创建
-        TextOutputFormat.setOutputPath(job, new Path("hafs://node01:8082/wordcount_cout"));
+        // 设置输出路径,会自动创建
+        TextOutputFormat.setOutputPath(job, new Path("hafs://node01:8082/out/flowcount"));
         
         boolean b = job.waitForCompletion(true);
         

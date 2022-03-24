@@ -1,4 +1,4 @@
-package com.dongnaoedu.network.hadoop.mapreduce;
+package com.dongnaoedu.network.hadoop.mapreduce.combiner;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
@@ -16,7 +16,7 @@ public class JobMain extends Configured implements Tool{
 
     @Override
     public int run(String[] strings) throws Exception{
-        Job job = Job.getInstance(super.getConf(), "mapReduce_wordCount");
+        Job job = Job.getInstance(super.getConf(), "mapReduce_combiner");
         
         //打包放在集群下运行，需要做一个配置
         job.setJarByClass(JobMain.class);
@@ -32,7 +32,8 @@ public class JobMain extends Configured implements Tool{
         job.setMapOutputValueClass(LongWritable.class);
         
         // 第三 四 五 六步采用默认方式（分区 排序 规约 分组）
-        
+        job.setCombinerClass(MyCombiner.class);
+
         // 第七步:设置Reduce类
         job.setReducerClass(WordCountReduce.class);
         job.setOutputKeyClass(Text.class);
@@ -40,7 +41,7 @@ public class JobMain extends Configured implements Tool{
         
         // 第八步：设置输出类
         job.setOutputFormatClass(TextOutputFormat.class);
-        // 设置输出路径，会自动创建
+        // 设置输出路径
         TextOutputFormat.setOutputPath(job, new Path("hafs://node01:8082/wordcount_cout"));
         
         boolean b = job.waitForCompletion(true);

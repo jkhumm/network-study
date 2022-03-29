@@ -4,7 +4,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author heian
@@ -46,6 +45,7 @@ public class MyReadWriteLock {
             //锁被占用（可能是自己）
             if (Thread.currentThread() == reference.get()){
                 writeCount.set(writeCount.get()+acquires);//单线程  无需CAS
+                return true;
             }
         }else {
             //非公平的实现

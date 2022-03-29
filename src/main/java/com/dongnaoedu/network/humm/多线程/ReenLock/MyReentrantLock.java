@@ -30,6 +30,7 @@ public class MyReentrantLock {
             //锁被占用（可能是自己）
             if (Thread.currentThread() == reference.get()){
                 count.set(count.get()+1);//单线程  无需CAS
+                return true;
             }
         }else {
             //为了实现公平锁，需要判断进来的线程是不是队列头部线程，不是则直接返回false(不让外来线程可乘之机)

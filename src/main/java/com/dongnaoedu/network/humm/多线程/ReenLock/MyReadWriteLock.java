@@ -34,7 +34,7 @@ public class MyReadWriteLock {
         }
     }
     /**
-     * 尝试获取锁（不是真的去拿锁，所以不用加入到阻塞队列）
+     * 尝试获取写锁（不是真的去拿锁，所以不用加入到阻塞队列）
      * 修改count 和 reference  acquire：重入的次数默认是1
      */
     public boolean tryLock(int acquires){

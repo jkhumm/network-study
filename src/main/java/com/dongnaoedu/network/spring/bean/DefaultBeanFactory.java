@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, Closeable {
 
     //缓存你要定义的 beanDefinition
-    private Map<String,BeanDefinition> map = new ConcurrentHashMap<>();
+    private Map<String,BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>();
     //缓存你要定义的 bean
     private Map<String,Object> beanMap = new ConcurrentHashMap<>();
 
@@ -29,7 +29,7 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
 
     @Override
     public Object getBean(String beanName) throws Exception{
-        BeanDefinition bd = map.get(beanName);
+        BeanDefinition bd = beanDefinitionMap.get(beanName);
         Object bean = doGetBean(beanName);
 
         //完成属性注入
@@ -51,15 +51,15 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
             return bean;
         }
         //创建对象的方式有三种：构造函数、静态工厂、成员工厂
-        BeanDefinition beanDefinition = map.get(beanName);
+        BeanDefinition beanDefinition = beanDefinitionMap.get(beanName);
         Objects.requireNonNull(beanDefinition,"beanDefinition 不存在");
-        Class<?> beanClass = beanDefinition.getBeanClass();
         // 记录正在创建的Bean
         Set<String> ingBeans = this.buildingBeans;
-        // 检测循环依赖
+        // 检测循环依赖，发现对象处于创建中，则抛出异常
         if(ingBeans.contains(beanName)){
             throw new Exception(beanName + " 循环依赖！" + ingBeans);
         }
+        Class<?> beanClass = beanDefinition.getBeanClass();
         // 记录正在创建的Bean
         ingBeans.add(beanName);
         if (beanClass != null){
@@ -83,7 +83,9 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
         return bean;
     }
 
-    //通过构造方法产生bean
+    /**
+     * 通过构造方法产生bean
+     */
     private Object createBeanByConstructor(BeanDefinition bd) throws Exception {
         Object instance = null;
         if(CollectionUtils.isEmpty(bd.getConstructorArgumentValues())) {
@@ -151,10 +153,10 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
                 if (!m0.getName().equals(methodName)) {
                     continue;
                 }
-                Class<?>[] paramterTypes = m0.getParameterTypes();
-                if (paramterTypes.length == args.length) {
-                    for (int i = 0; i < paramterTypes.length; i++) {
-                        if (!paramterTypes[i].isAssignableFrom(args[i].getClass())) {
+                Class<?>[] parameterTypes = m0.getParameterTypes();
+                if (parameterTypes.length == args.length) {
+                    for (int i = 0; i < parameterTypes.length; i++) {
+                        if (!parameterTypes[i].isAssignableFrom(args[i].getClass())) {
                             continue outer;
                         }
                     }
@@ -190,11 +192,11 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
             Constructor<?>[]  cts = bd.getBeanClass().getConstructors();
             // 判断逻辑：先判断参数数量，依次判断形参跟实参进行类型匹配
             outer: for(Constructor<?> c : cts) {
-                Class<?>[] paramterTypes = c.getParameterTypes();
-                if(paramterTypes.length == args.length) {
-                    for(int i = 0; i < paramterTypes.length; i++) {
+                Class<?>[] parameterTypes = c.getParameterTypes();
+                if(parameterTypes.length == args.length) {
+                    for(int i = 0; i < parameterTypes.length; i++) {
                         //判断构造函数的形参是否和我们实参数一致
-                        if(!paramterTypes[i].isAssignableFrom(args[i].getClass())) {
+                        if(!parameterTypes[i].isAssignableFrom(args[i].getClass())) {
                             continue outer;
                         }
                     }
@@ -250,8 +252,9 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
                 continue;
             }
             Class<?> clazz = instance.getClass();
-            Field p = clazz.getDeclaredField(pv.getName());
-            p.setAccessible(true);
+            // 通过它存储的成员变量拿到field
+            Field field = clazz.getDeclaredField(pv.getName());
+            field.setAccessible(true);
             Object rv = pv.getValue();
             Object v = null;
             if (rv == null) {
@@ -269,7 +272,7 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
             } else {
                 v = rv;
             }
-            p.set(instance, v);
+            field.set(instance, v);
         }
     }
 
@@ -283,23 +286,23 @@ public class DefaultBeanFactory implements BeanFactory,BeanDefinitionRegistry, C
         if(containsBeanDefinition(beanName)) {
             throw new RuntimeException("名字为["+beanName+"]已存在："+getBeanDefinition(beanName));
         }
-        map.put(beanName,beanDefinition);
+        beanDefinitionMap.put(beanName,beanDefinition);
     }
 
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
-        return this.map.get(beanName);
+        return this.beanDefinitionMap.get(beanName);
     }
 
     @Override
     public boolean containsBeanDefinition(String beanName) {
-        return map.containsKey(beanName);
+        return beanDefinitionMap.containsKey(beanName);
     }
 
     @Override
     public void close() throws IOException {
         //针对单例bean进行的销毁方法
-        map.forEach((s, beanDefinition) -> {
+        beanDefinitionMap.forEach((s, beanDefinition) -> {
             if (beanDefinition.isSingleton() && StringUtils.isNotBlank(beanDefinition.getDestroyMethod())){
                 try {
                     Object bean = beanMap.get(s);

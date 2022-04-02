@@ -34,14 +34,14 @@ public class AnimalsProxyInvocationHandler implements InvocationHandler {
 
     public static void main(String[] args) throws Exception{
         //目标类必须实现接口否则会抛出类转化异常
-        System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles", "true");
-        Animals dogTarget = new Dog();
+        //System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles", "true");
+        Dog dogTarget = new Dog();
         //类加载器、代理类的接口数组（Dog类实现接口的数组）、代理业务类
         Animals proxy = (Animals)Proxy.newProxyInstance(dogTarget.getClass().getClassLoader(), dogTarget.getClass().getInterfaces(),
                 new AnimalsProxyInvocationHandler(dogTarget));
         //重新生成一个子类进行接口方法的调用
         proxy.eat();
-        ProxyUtils.generateClassFile(proxy.getClass().getName(),dogTarget.getClass().getInterfaces());
+        //ProxyUtils.generateClassFile(proxy.getClass().getName(),dogTarget.getClass().getInterfaces());
     }
 
 }

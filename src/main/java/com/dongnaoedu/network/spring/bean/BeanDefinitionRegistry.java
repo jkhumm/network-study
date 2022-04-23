@@ -11,7 +11,7 @@ public interface BeanDefinitionRegistry {
      * 向工厂注册定义的bean
      * @param beanDefinition 你想要的注册的bean的信息
      */
-    void registerBeanDefinition(String beanName,BeanDefinition beanDefinition);
+    void registerBeanDefinition(String beanNameMapperProxy,BeanDefinition beanDefinition);
 
     /**
      * 获取已经注册的bean

@@ -1,6 +1,9 @@
 package com.dongnaoedu.network.humm.test;
 
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author heian
@@ -9,25 +12,24 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Book {
 
-    private String name;
-    private int price;
 
-    @Override
-    public boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Book book = (Book) o;
-
-        if (price != book.price) return false;
-        return name != null ? name.equals(book.name) : book.name == null;
+    public static void main(String[] args) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        executorService.execute(() -> {
+            System.out.println("线程1" + Thread.currentThread().getName());
+        });
+        executorService.execute(() -> {
+            System.out.println("线程2" + Thread.currentThread().getName());
+        });
+        executorService.execute(() -> {
+            System.out.println("线程3" + Thread.currentThread().getName());
+        });
+        // 会继续创建线程
+        TimeUnit.SECONDS.sleep(2);
+        executorService.execute(() -> {
+            System.out.println("线程4" + Thread.currentThread().getName());
+        });
     }
 
-    @Override
-    public int hashCode() {
-        int result = name != null ? name.hashCode() : 0;
-        result = 31 * result + price;
-        return result;
-    }
+
 }

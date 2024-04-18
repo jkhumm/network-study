@@ -144,7 +144,16 @@
             <artifactId>hadoop-client</artifactId>
             <version>3.1.1</version>
         </dependency>
-
+        <!-- actuators已经定义好的一些关于JVM或者Tomcat的度量Meter。 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- prometheus依赖 -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
 
 
 

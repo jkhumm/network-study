@@ -2,7 +2,7 @@ package com.dongnaoedu.network.humm.stream;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.eclipse.jetty.util.ajax.JSON;
+import org.apache.hadoop.shaded.org.eclipse.jetty.util.ajax.JSON;
 
 import java.util.ArrayList;
 import java.util.List;
